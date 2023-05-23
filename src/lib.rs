@@ -34,6 +34,9 @@ pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
             message: None,
         });
     }
+    if cmd.0.trim() == "" {
+        return Ok(RetStatus { exit: false, message: None })
+    }
     match unsafe { fork() } {
         Ok(ForkResult::Child) => {
             let (cmd, args) = cmd;
