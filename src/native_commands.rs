@@ -1,12 +1,14 @@
-use std::str::FromStr;
+use std::{str::FromStr, println};
 
 use color_eyre::Result;
+use nix::unistd::chdir;
 
 pub struct NativeResult {
     pub exit: bool,
 }
 
 pub enum NativeCommand {
+    ChangeDirectory,
     Exit,
     List,
 }
@@ -18,6 +20,7 @@ impl FromStr for NativeCommand {
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
+            "cd" => Ok(NativeCommand::ChangeDirectory),
             "exit" => Ok(NativeCommand::Exit),
             "ls" => Ok(NativeCommand::List),
             _ => Err("Not a native command".to_owned()),
@@ -34,7 +37,14 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<NativeResult> {
         (NativeCommand::Exit, _args) => {
             println!("exit");
             Ok(NativeResult { exit: true })
-            // inter process communication needed?
+        }
+        (NativeCommand::ChangeDirectory, args) => {
+            if args.len() > 2 {
+                println!("Too many arguments");
+            } else if chdir(args[1]).is_err() {
+                println!("Couldn't change directory");
+            }
+            Ok(NativeResult { exit: false })
         }
     }
 }
