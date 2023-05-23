@@ -8,7 +8,7 @@ pub struct NativeResult {
 
 pub enum NativeCommand {
     Ls,
-    Exit
+    Exit,
 }
 
 pub type NativeFullCommand<'a> = (NativeCommand, Vec<&'a str>);
@@ -20,7 +20,7 @@ impl FromStr for NativeCommand {
         match s {
             "exit" => Ok(NativeCommand::Exit),
             "ls" => Ok(NativeCommand::Ls),
-            _ => Err("Not a native command".to_owned())
+            _ => Err("Not a native command".to_owned()),
         }
     }
 }
