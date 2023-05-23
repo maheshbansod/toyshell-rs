@@ -45,7 +45,7 @@ pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
             if execvp(&cmd, &args).is_err() {
                 return Ok(RetStatus {
                     exit: true,
-                    message: Some(format!("Error running command.")),
+                    message: Some("Error running command.".to_string()),
                 });
             }
         }
