@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fs, str::FromStr};
 
 use color_eyre::Result;
 use nix::unistd::chdir;
@@ -18,7 +18,7 @@ impl FromStr for NativeCommand {
         match s {
             "cd" => Ok(NativeCommand::ChangeDirectory),
             "exit" => Ok(NativeCommand::Exit),
-            "ls" => Ok(NativeCommand::List),
+            "list" => Ok(NativeCommand::List),
             _ => Err("Not a native command".to_owned()),
         }
     }
@@ -32,10 +32,41 @@ pub struct RetStatus {
 pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
     match cmd {
         (NativeCommand::List, args) => {
-            let ls_output = format!("LS: {:?}", args);
+            let mut total_ls_output = String::new();
+            // TODO: modes + refactor maybe
+            enum _ListMode {
+                All,
+                Files,
+                Count
+            }
+            let consumed_args = 1;
+            let dirs = if args.len() > 1 {
+                args.into_iter().skip(consumed_args).collect()
+            } else {
+                vec!["."]
+            };
+            for dir in dirs {
+                let paths = fs::read_dir(dir)?;
+                let ls_output = paths
+                    .into_iter()
+                    .filter(|p| {
+                        if let Ok(p) = p {
+                            if let Ok(f) = p.file_type() {
+                                return f.is_file();
+                            }
+                        }
+                        return false;
+                    })
+                    .collect::<std::result::Result<Vec<_>, _>>()?;
+                let ls_output = ls_output
+                    .iter()
+                    .map(|dir_entry| dir_entry.path().display().to_string())
+                    .collect::<Vec<_>>().join(" ");
+                total_ls_output += &ls_output;
+            }
             Ok(RetStatus {
                 exit: false,
-                message: Some(ls_output),
+                message: Some(total_ls_output),
             })
         }
         (NativeCommand::Exit, _args) => Ok(RetStatus {
