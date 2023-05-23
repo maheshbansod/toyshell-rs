@@ -16,7 +16,14 @@ fn main() -> Result<()> {
         stdin().read_line(&mut buf).expect("Error reading user input");
         let cmd = parse_input(&buf);
         match process_command(cmd) {
-            Ok(RetStatus::NativeStatus(res)) if res.exit => alive = false,
+            Ok(RetStatus { exit, message }) if exit && message.is_none() => alive = false,
+            Ok(RetStatus { exit, message }) if exit => {
+                // case where alive = false and message exists (happens when child
+                // process didn't run)
+                let message = message.unwrap();
+                println!("{message}");
+                alive = false;
+            },
             Err(_) => println!("Error occurred"),
             _ => (),
         }

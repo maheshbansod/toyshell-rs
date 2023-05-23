@@ -1,5 +1,9 @@
+use std::{ffi::CString, println};
+
 use color_eyre::Result;
-use nix::{sys::wait::{waitpid, WaitStatus}, unistd::{ForkResult, fork}};
+use native_commands::run_native;
+use nix::{sys::wait::{waitpid, WaitStatus}, unistd::{ForkResult, fork, execv}};
+mod native_commands;
 
 
 pub struct ShellConfig {
@@ -15,41 +19,24 @@ pub fn parse_input(input: &str) -> ShellCommand {
     (tokens[0], tokens[1..].to_vec())
 }
 
-pub struct NativeResult {
+pub struct RetStatus {
     pub exit: bool,
-}
-
-pub fn run_native(cmd: ShellCommand) -> Result<NativeResult> {
-    match cmd {
-        ("ls", args) => {
-            println!("LS: {:?}", args);
-            Ok(NativeResult { exit: false })
-        }
-        ("exit", _args) => {
-            println!("exit");
-            Ok(NativeResult { exit: true })
-            // inter process communication needed?
-        }
-        (cmd, args) => {
-            println!("cmd: {}, args: {:?}", cmd, args);
-            Ok(NativeResult { exit: false })
-        }
-    }
-}
-
-pub enum RetStatus {
-    NativeStatus(NativeResult),
-    ExtStatus { stat: i32 },
+    pub message: Option<String>
 }
 
 pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
-    if true {
-        let res = run_native(cmd)?;
-        return Ok(RetStatus::NativeStatus(res))
+    if let Ok(main_cmd) = cmd.0.parse() {
+        let res = run_native((main_cmd,cmd.1))?;
+        return Ok(RetStatus { exit: res.exit, message: None });
     }
     match unsafe {fork()} {
         Ok(ForkResult::Child) => {
-            // exec the command
+            let (cmd, args) = cmd;
+            let cmd = CString::new(cmd)?;
+            let args: Vec<_> = args.into_iter().map(CString::new).collect::<std::result::Result<_,_>>()?;
+            if execv(&cmd, &args).is_err() {
+                return Ok(RetStatus { exit: true, message: Some(format!("Error running command.")) });
+            }
         }
         Ok(ForkResult::Parent { child }) => {
             while waitpid(child, None)? == WaitStatus::StillAlive {
@@ -58,7 +45,7 @@ pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
         }
         Err(_) => println!("Failed to fork")
     }
-    Ok(RetStatus::ExtStatus { stat: 0 })
+    Ok(RetStatus { exit: false, message: None })
 }
 
 
