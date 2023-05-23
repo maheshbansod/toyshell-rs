@@ -18,7 +18,7 @@ pub fn parse_input(input: &str) -> ShellCommand {
     if tokens.is_empty() {
         return ("", vec![]);
     }
-    (tokens[0], tokens[1..].to_vec())
+    (tokens[0], tokens.to_vec())
 }
 
 pub struct RetStatus {
