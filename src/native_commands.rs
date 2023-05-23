@@ -1,11 +1,7 @@
-use std::{str::FromStr, println};
+use std::str::FromStr;
 
 use color_eyre::Result;
 use nix::unistd::chdir;
-
-pub struct NativeResult {
-    pub exit: bool,
-}
 
 pub enum NativeCommand {
     ChangeDirectory,
@@ -28,23 +24,41 @@ impl FromStr for NativeCommand {
     }
 }
 
-pub fn run_native(cmd: NativeFullCommand) -> Result<NativeResult> {
+pub struct RetStatus {
+    pub exit: bool,
+    pub message: Option<String>,
+}
+
+pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
     match cmd {
         (NativeCommand::List, args) => {
-            println!("LS: {:?}", args);
-            Ok(NativeResult { exit: false })
+            let ls_output = format!("LS: {:?}", args);
+            Ok(RetStatus {
+                exit: false,
+                message: Some(ls_output),
+            })
         }
-        (NativeCommand::Exit, _args) => {
-            println!("exit");
-            Ok(NativeResult { exit: true })
-        }
+        (NativeCommand::Exit, _args) => Ok(RetStatus {
+            exit: true,
+            message: Some("exit".to_string()),
+        }),
         (NativeCommand::ChangeDirectory, args) => {
             if args.len() > 2 {
-                println!("Too many arguments");
+                Ok(RetStatus {
+                    exit: false,
+                    message: Some("Too many arguments".to_string()),
+                })
             } else if chdir(args[1]).is_err() {
-                println!("Couldn't change directory");
+                Ok(RetStatus {
+                    exit: false,
+                    message: Some("Couldn't change directory".to_string()),
+                })
+            } else {
+                Ok(RetStatus {
+                    exit: false,
+                    message: None,
+                })
             }
-            Ok(NativeResult { exit: false })
         }
     }
 }

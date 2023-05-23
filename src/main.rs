@@ -4,7 +4,7 @@ use std::{
 };
 
 use color_eyre::Result;
-use toyshell::{parse_input, process_command, RetStatus, ShellConfig};
+use toyshell::{parse_input, process_command, ShellConfig};
 
 fn main() -> Result<()> {
     let shell_config = ShellConfig {
@@ -20,16 +20,13 @@ fn main() -> Result<()> {
             .expect("Error reading user input");
         let cmd = parse_input(&buf);
         match process_command(cmd) {
-            Ok(RetStatus { exit, message }) if exit && message.is_none() => alive = false,
-            Ok(RetStatus { exit, message }) if exit => {
-                // case where alive = false and message exists (happens when child
-                // process didn't run)
-                let message = message.unwrap();
-                println!("{message}");
-                alive = false;
+            Ok(ret_status) => {
+                if let Some(message) = ret_status.message {
+                    println!("{message}");
+                }
+                alive = !ret_status.exit;
             }
             Err(_) => println!("Error occurred"),
-            _ => (),
         }
     }
     Ok(())

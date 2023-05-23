@@ -2,6 +2,7 @@ use std::{ffi::CString, println};
 
 use color_eyre::Result;
 use native_commands::run_native;
+pub use native_commands::RetStatus;
 use nix::{
     sys::wait::{waitpid, WaitStatus},
     unistd::{execvp, fork, ForkResult},
@@ -21,18 +22,9 @@ pub fn parse_input(input: &str) -> ShellCommand {
     (tokens[0], tokens.to_vec())
 }
 
-pub struct RetStatus {
-    pub exit: bool,
-    pub message: Option<String>,
-}
-
 pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
     if let Ok(main_cmd) = cmd.0.parse() {
-        let res = run_native((main_cmd, cmd.1))?;
-        return Ok(RetStatus {
-            exit: res.exit,
-            message: None,
-        });
+        return run_native((main_cmd, cmd.1));
     }
     if cmd.0.trim() == "" {
         return Ok(RetStatus {
