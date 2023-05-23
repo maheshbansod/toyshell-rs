@@ -43,10 +43,10 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
             message: Some("exit".to_string()),
         }),
         (NativeCommand::ChangeDirectory, args) => {
-            if args.len() > 2 {
+            if args.len() != 2 {
                 Ok(RetStatus {
                     exit: false,
-                    message: Some("Too many arguments".to_string()),
+                    message: Some("Usage: cd <DIR>".to_string()),
                 })
             } else if chdir(args[1]).is_err() {
                 Ok(RetStatus {
