@@ -4,7 +4,7 @@ use color_eyre::Result;
 use native_commands::run_native;
 use nix::{
     sys::wait::{waitpid, WaitStatus},
-    unistd::{execv, fork, ForkResult},
+    unistd::{execvp, fork, ForkResult},
 };
 mod native_commands;
 
@@ -42,7 +42,7 @@ pub fn process_command(cmd: ShellCommand) -> Result<RetStatus> {
                 .into_iter()
                 .map(CString::new)
                 .collect::<std::result::Result<_, _>>()?;
-            if execv(&cmd, &args).is_err() {
+            if execvp(&cmd, &args).is_err() {
                 return Ok(RetStatus {
                     exit: true,
                     message: Some(format!("Error running command.")),
