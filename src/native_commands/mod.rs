@@ -1,15 +1,17 @@
 use std::str::FromStr;
 mod list;
+mod typeline;
 
 use color_eyre::Result;
 use nix::unistd::chdir;
 
-use self::list::run_list_command;
+use self::{list::run_list_command, typeline::run_typeline_command};
 
 pub enum NativeCommand {
     ChangeDirectory,
     Exit,
     List,
+    Typeline,
 }
 
 pub type NativeFullCommand<'a> = (NativeCommand, Vec<&'a str>);
@@ -22,6 +24,7 @@ impl FromStr for NativeCommand {
             "cd" => Ok(NativeCommand::ChangeDirectory),
             "exit" => Ok(NativeCommand::Exit),
             "list" => Ok(NativeCommand::List),
+            "typeline" => Ok(NativeCommand::Typeline),
             _ => Err("Not a native command".to_owned()),
         }
     }
@@ -57,5 +60,6 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
                 })
             }
         }
+        (NativeCommand::Typeline, args) => run_typeline_command(args),
     }
 }
