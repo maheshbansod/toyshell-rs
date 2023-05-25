@@ -56,6 +56,24 @@ Example:
 $ count l src/main.rs
 ```
 
+### Search
+This command searches for a pattern within a file  
+
+Syntax
+```
+search <f|a|c> <filepath> <pattern>
+```
+| Option | Description | Symbol |
+| :---   |  :---:      | :---:  |
+| First | First occurrence | f |
+| All | All occurrences | a |
+| Count | Count occurrences | c |
+
+Example:
+```
+$ search a src/main.rs let
+```
+
 ### ChangeDirectory
 Change the current working directory
 

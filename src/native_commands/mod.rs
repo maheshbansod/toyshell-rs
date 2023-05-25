@@ -1,18 +1,23 @@
 use std::str::FromStr;
 mod count;
 mod list;
+mod search;
 mod typeline;
 
 use color_eyre::Result;
 use nix::unistd::chdir;
 
-use self::{count::run_count_command, list::run_list_command, typeline::run_typeline_command};
+use self::{
+    count::run_count_command, list::run_list_command, search::run_search_command,
+    typeline::run_typeline_command,
+};
 
 pub enum NativeCommand {
     ChangeDirectory,
     Count,
     Exit,
     List,
+    Search,
     Typeline,
 }
 
@@ -27,6 +32,7 @@ impl FromStr for NativeCommand {
             "count" => Ok(NativeCommand::Count),
             "exit" => Ok(NativeCommand::Exit),
             "list" => Ok(NativeCommand::List),
+            "search" => Ok(NativeCommand::Search),
             "typeline" => Ok(NativeCommand::Typeline),
             _ => Err("Not a native command".to_owned()),
         }
@@ -64,6 +70,7 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
             }
         }
         (NativeCommand::Count, args) => run_count_command(args),
+        (NativeCommand::Search, args) => run_search_command(args),
         (NativeCommand::Typeline, args) => run_typeline_command(args),
     }
 }
