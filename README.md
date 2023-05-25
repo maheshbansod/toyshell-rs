@@ -1,6 +1,6 @@
 # toyshell
 
-A toyshell that is a re-implementation of the toyshell project in C (https://github.com/maheshbansod/toyshell)  
+A toyshell that is a re-implementation of the toyshell project which was originally in C (https://github.com/maheshbansod/toyshell)  
 I'm gonna try to implement all the pre-defined commands that are in there as close as possible I guess. Or maybe not. idk.
 
 ## Built-in commands
