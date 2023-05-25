@@ -39,6 +39,23 @@ Example:
 $ typeline +4 src/main.rs
 ```
 
+### Count
+This command counts the number of words, characters, or lines in a file.
+Syntax
+```
+count [c|w|l] <filename>
+```
+| Option | Description | Symbol |
+| :---   |  :---:      | :---:  |
+| Characters | Count characters | c |
+| Words | Count words | w |
+| Lines | Count lines | l |
+
+Example:
+```
+$ count l src/main.rs
+```
+
 ### ChangeDirectory
 Change the current working directory
 
