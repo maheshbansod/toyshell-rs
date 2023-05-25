@@ -1,15 +1,15 @@
 use std::str::FromStr;
+mod cd;
 mod count;
 mod list;
 mod search;
 mod typeline;
 
 use color_eyre::Result;
-use nix::unistd::chdir;
 
 use self::{
-    count::run_count_command, list::run_list_command, search::run_search_command,
-    typeline::run_typeline_command,
+    cd::run_cd_command, count::run_count_command, list::run_list_command,
+    search::run_search_command, typeline::run_typeline_command,
 };
 
 pub enum NativeCommand {
@@ -51,24 +51,7 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
             exit: true,
             message: Some("exit".to_string()),
         }),
-        (NativeCommand::ChangeDirectory, args) => {
-            if args.len() != 2 {
-                Ok(RetStatus {
-                    exit: false,
-                    message: Some("Usage: cd <DIR>".to_string()),
-                })
-            } else if chdir(args[1]).is_err() {
-                Ok(RetStatus {
-                    exit: false,
-                    message: Some("Couldn't change directory".to_string()),
-                })
-            } else {
-                Ok(RetStatus {
-                    exit: false,
-                    message: None,
-                })
-            }
-        }
+        (NativeCommand::ChangeDirectory, args) => run_cd_command(args),
         (NativeCommand::Count, args) => run_count_command(args),
         (NativeCommand::Search, args) => run_search_command(args),
         (NativeCommand::Typeline, args) => run_typeline_command(args),
