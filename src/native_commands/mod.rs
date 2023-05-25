@@ -1,14 +1,16 @@
 use std::str::FromStr;
+mod count;
 mod list;
 mod typeline;
 
 use color_eyre::Result;
 use nix::unistd::chdir;
 
-use self::{list::run_list_command, typeline::run_typeline_command};
+use self::{count::run_count_command, list::run_list_command, typeline::run_typeline_command};
 
 pub enum NativeCommand {
     ChangeDirectory,
+    Count,
     Exit,
     List,
     Typeline,
@@ -22,6 +24,7 @@ impl FromStr for NativeCommand {
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
             "cd" => Ok(NativeCommand::ChangeDirectory),
+            "count" => Ok(NativeCommand::Count),
             "exit" => Ok(NativeCommand::Exit),
             "list" => Ok(NativeCommand::List),
             "typeline" => Ok(NativeCommand::Typeline),
@@ -60,6 +63,7 @@ pub fn run_native(cmd: NativeFullCommand) -> Result<RetStatus> {
                 })
             }
         }
+        (NativeCommand::Count, args) => run_count_command(args),
         (NativeCommand::Typeline, args) => run_typeline_command(args),
     }
 }
